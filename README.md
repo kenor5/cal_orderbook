@@ -8,6 +8,7 @@
 .
 ├── bin                    启动文件生成目录 
 ├── data                   数据目录
+├── dockerfile             应用程序打包成docker镜像，当你更新程序内容后，打包命令为 `docker build -t [目标镜像名称，e.g. csob:v1.0] .`
 ├── include
 │   ├── basic.h            定义基本数据结构，如 instrument_t、trade_t、order_t
 │   ├── calculate.h        计算过程中的存储结构，如 orderbook_t
@@ -17,20 +18,30 @@
 │   └── utils.h            工具函数
 ├── Makefile
 ├── README.md
+├── script                 脚本
+│   ├── kc.sh              kubectl 的快捷操作
+│   ├── start.sh           计算任务在 k8s 集群上的启动脚本
+│   └── test.sh            运行时间统计
 ├── src
-│   ├── calculate.cpp
-│   ├── datatocalculate.cpp 计算模块，同时和读取和存储交互
-│   ├── getbasic.cpp        
-│   ├── main.cpp            读取模块，从 csv 中读数据
-│   └── mongodbstorage.cpp  存储模块，向 mondodb 数据库中写入
-└── sub-pub                 模块间通信用到的工具 redis pub-sub模式
-    ├── Makefile
-    ├── publisher.cpp
-    ├── redis_publisher.cpp
-    ├── redis_publisher.h
-    ├── redis_subscriber.cpp
-    ├── redis_subscriber.h
-    └── subscriber.cpp
+│   ├── calculate.cpp      
+│   ├── getbasic.cpp       
+│   └── main.cpp
+└── yaml                   声明k8s pod的配置等，部署方式为`kubectl apply -f [*.yaml]`,因为其中有环境变量，所以搭配start.sh 使用
+    ├── csob_pod.yaml      将计算任务启动为 Pod，特点为：运行完即结束，batch job
+    └── csob.yaml          将计算任务启动为 Deployment，特点为：多备份、容错
 
-5 directories, 26 files
+6 directories, 23 files
 
+
+## 如何启动
+
+### 在本地启动
+* `make all` 生成可执行文件
+* `./csob [file path]` 执行
+
+### 在集群中启动
+* `docker build -t csob:v1.0 .` 构建镜像
+* `./script/start.sh` 在集群中启动，在start.sh中，需要指订的内容有
+    * `ImageName` 镜像名称
+    * `YamlName` yaml文件路径
+    * `ProJN` 计算任务在集群中的名称（不同计算任务不能重复）
