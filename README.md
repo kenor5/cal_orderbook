@@ -5,7 +5,7 @@
 
 ## 关于目录
 
-.
+.  
 ├── bin                    启动文件生成目录   
 ├── data                   数据目录  
 ├── dockerfile             应用程序打包成docker镜像，当你更新程序内容后，打包命令为 `docker build -t [目标镜像名称，e.g. csob:v1.0] .`  
