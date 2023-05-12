@@ -1,0 +1,29 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: ${ProJ}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${ProJ}
+  template:
+    metadata:
+      labels:
+        app: ${ProJ}
+    spec:
+      containers:
+      - name: ${ProJ}
+        image: ${ImageName}
+        imagePullPolicy: IfNotPresent
+        command: [ "/bin/sh", "-c", "--" ]
+        args: ["./csob ${FileName}"]
+
+        volumeMounts:
+        - mountPath: /nfs   #容器的挂载点,也就是在容器里访问PV的路径
+          name: statics-datadir                        #被挂载卷的名称
+      volumes:
+      - name: statics-datadir  #共享存储卷名称,把下面的PVC声明一个卷叫做statics-datadir，再把这个卷挂载到上面的容器目录
+        persistentVolumeClaim:   #类型是PVC
+          claimName: nfs-pvc-orderbook  #指定要绑定的PVC，前面已经创建好了
+ 

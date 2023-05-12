@@ -2,11 +2,7 @@
 #define _BASIC_H
 
 
-#include <boost/serialization/base_object.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/vector.hpp>
+
 
 enum trade_flag_t{chargeback_flag,deal_flag} ;
 enum order_side_t{bid_flag,ask_flag};
@@ -18,11 +14,7 @@ class price_t
 private:
     int price_num;//正常price会保留4位小数，price_num记录price*10000的大小，以避免float运算的误差
 public:
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int version) {
-        ar & price_num;
-    }
+
 
     void set_price_num(int num) {this->price_num = num;};
     int get_price_num_in_int() const{return price_num;};
@@ -47,12 +39,8 @@ protected:
     int instrument_id;//债券代码
     //src_id 过滤4
 public:
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int version) {
-        ar & nano_second;
-        ar & instrument_id;
-    }
+
+
     void set_nano_second(time_stamp_t ns){this->nano_second=ns;};
     time_stamp_t get_nano_second()const {return this->nano_second;};
     void set_instrument_id(int id){this->instrument_id=id;};
@@ -102,17 +90,7 @@ private:
     int bid_seq_num;//bid_order's seq_num
     int ask_seq_num;//ask_order's seq_num
 public:
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int version) {
-        ar & boost::serialization::base_object<instrument_t>(*this);
-        ar & trade_flag;
-        ar & trade_price;
-        ar & trade_vol;
-        ar & seq_num;
-        ar & bid_seq_num;
-        ar & ask_seq_num;
-    }
+
 
     void set_trade_flag(trade_flag_t flag){this->trade_flag=flag;};
     trade_flag_t get_trade_flag()const {return this->trade_flag;};
@@ -148,16 +126,7 @@ private:
     order_type_t ord_type;//0 is 市价单 ,1 is 限价单 ,2 is 本方最优 ; defined before namespace
     int seq_num;
 public:
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int version) {
-        ar & boost::serialization::base_object<instrument_t>(*this);
-        ar & side;
-        ar & order_price;
-        ar & order_vol;
-        ar & ord_type;
-        ar & seq_num;
-    }
+
     void set_side(order_side_t side){this->side=side;};
     order_side_t get_side()const {return this->side;}; 
     void set_order_price(price_t price){this->order_price=price;};

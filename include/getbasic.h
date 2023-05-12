@@ -97,46 +97,47 @@
 #define Order_SeqNum_Col 20
 #define Order_BizIndex_Col 21
 
-template<class T>
-class Serialization : public T {
-public:
+// template<class T>
+// class Serialization : public T {
+// public:
  
-    void serialization(std::ostringstream& ostream) {
-        boost::archive::text_oarchive oa(ostream);
-        oa << *this;
-    }
+//     void serialization(std::ostringstream& ostream) {
+//         boost::archive::text_oarchive oa(ostream);
+//         oa << *this;
+//     }
  
-    void unserialization(std::istringstream& istream) {
-        boost::archive::text_iarchive ia(istream);
-        ia >> *this;
-    }
-private:  
-    friend class boost::serialization::access;  
+//     void unserialization(std::istringstream& istream) {
+//         boost::archive::text_iarchive ia(istream);
+//         ia >> *this;
+//     }
+// private:  
+//     friend class boost::serialization::access;  
  
-    template<class Archive>  
-    void serialize(Archive& ar, const unsigned int version) {  
-        ar & boost::serialization::base_object<T>(*this);  
-    }
-};
+//     template<class Archive>  
+//     void serialize(Archive& ar, const unsigned int version) {  
+//         ar & boost::serialization::base_object<T>(*this);  
+//     }
+// };
 
 
-template<class T>
-class VectorSerialization : public Serialization<std::vector<T> > {
-};
+// template<class T>
+// class VectorSerialization : public Serialization<std::vector<T> > {
+// };
 
 
 class GetBasic
 {
 private:
 
-    VectorSerialization<trade_t> trade;
-    VectorSerialization<order_t> order;
-
-
     //根据InstrumentID储存入二维数组中
-    // std::vector<VectorSerialization<trade_t>> Trades;
-    // std::vector<VectorSerialization<order_t>> Orders;
+    std::vector<trade_t> Trades;
+    std::vector<order_t> Orders;
 //    std::vector<std::vector<base_t>> Bases;
+
+
+    //根据SrcId将数据分流至get_Trade()或者get_Order()
+    void parse(rapidcsv::Document& doc);
+
 
     //将第row行数据构造一个trade并加入trades
     void get_Trade(int row, rapidcsv::Document& doc);
@@ -150,18 +151,9 @@ private:
 
 
 public:
-    std::vector<std::string> fileNames;
-    int cur_id;
-    std::string path;
-
-    GetBasic();  
-
-    //根据SrcId将数据分流至get_Trade()或者get_Order()
-    void parse(rapidcsv::Document& doc, const std::string& channel_name);
-
-    void publish(rapidcsv::Document, int);
-
-    void scan_dir(const std::string&);
+    GetBasic(const std::string&);  
+    std::vector<trade_t> get_Trades(){return Trades;};
+    std::vector<order_t> get_Orders(){return Orders;};
 };
 
 

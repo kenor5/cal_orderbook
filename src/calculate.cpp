@@ -1,5 +1,5 @@
 #include "./include/calculate.h"
-#include "./sub-pub/redis_publisher.h"
+// #include "./sub-pub/redis_publisher.h"
 #include <assert.h>
 
 
@@ -44,7 +44,9 @@ order_t order_book_t::get_lowest_seller() {
 }
 
 void order_book_t::del_target_buyer(int seq_num, int vol) {
-    auto [pt, t] = this->buyer_queue->get_seq_vol(seq_num);
+    auto seqvol = this->buyer_queue->get_seq_vol(seq_num);
+    auto pt = seqvol.first;
+    auto t = seqvol.second;
 
     assert(t.get_nano_second() != 0);
 
@@ -64,7 +66,9 @@ void order_book_t::del_target_buyer(int seq_num, int vol) {
 }
 
 void order_book_t::del_target_seller(int seq_num, int vol) {
-    auto [pt, t] = this->seller_queue->get_seq_vol(seq_num);
+    auto seqvol = this->seller_queue->get_seq_vol(seq_num);
+    auto pt = seqvol.first;
+    auto t = seqvol.second;
 
     assert(t.get_nano_second() != 0);
 
@@ -104,53 +108,53 @@ order_book_t::order_book_t() {
     this->seller_queue = new Skiplist<price_time, order_t>(32, 1);
 }
 
-std::string order_book_t::serialize(time_stamp_t cur_time) const {
+// std::string order_book_t::serialize(time_stamp_t cur_time) const {
     
-    // 先转成bson格式，在调用to_json转成字符串
-    std::vector<std::pair<price_time, order_t>> sklist = buyer_queue->dump_list();
+//     // 先转成bson格式，在调用to_json转成字符串
+//     std::vector<std::pair<price_time, order_t>> sklist = buyer_queue->dump_list();
 
-    auto builder = bsoncxx::builder::stream::document{};
+//     auto builder = bsoncxx::builder::stream::document{};
     
-    auto before_buyer = builder
-    << "timestamp" << std::to_string(cur_time)
-    << "buyer_queue" << bsoncxx::builder::stream::open_array;
+//     auto before_buyer = builder
+//     << "timestamp" << std::to_string(cur_time)
+//     << "buyer_queue" << bsoncxx::builder::stream::open_array;
 
-    for (auto &[k, v]: sklist) 
-        before_buyer = before_buyer << bsoncxx::builder::stream::open_document 
-                                    << "key"
-                                    << k.price.get_price_num_in_int() 
-                                    << "value" 
-                                    << v.get_order_vol()
-                                    << bsoncxx::builder::stream::close_document;
+//     for (auto &[k, v]: sklist) 
+//         before_buyer = before_buyer << bsoncxx::builder::stream::open_document 
+//                                     << "key"
+//                                     << k.price.get_price_num_in_int() 
+//                                     << "value" 
+//                                     << v.get_order_vol()
+//                                     << bsoncxx::builder::stream::close_document;
 
-    sklist = seller_queue->dump_list();
+//     sklist = seller_queue->dump_list();
     
-    auto before_seller = before_buyer << bsoncxx::builder::stream::close_array
-    << "seller_queue" << bsoncxx::builder::stream::open_array;
+//     auto before_seller = before_buyer << bsoncxx::builder::stream::close_array
+//     << "seller_queue" << bsoncxx::builder::stream::open_array;
 
-    for (auto &[k, v]: sklist) 
-        before_seller = before_seller << bsoncxx::builder::stream::open_document 
-                                      << "key"
-                                      << k.price.get_price_num_in_int() 
-                                      << "value" 
-                                      << v.get_order_vol()
-                                      << bsoncxx::builder::stream::close_document;
+//     for (auto &[k, v]: sklist) 
+//         before_seller = before_seller << bsoncxx::builder::stream::open_document 
+//                                       << "key"
+//                                       << k.price.get_price_num_in_int() 
+//                                       << "value" 
+//                                       << v.get_order_vol()
+//                                       << bsoncxx::builder::stream::close_document;
 
-    bsoncxx::document::value doc_value = before_seller << bsoncxx::builder::stream::close_array
-    << bsoncxx::builder::stream::finalize;  
-    return bsoncxx::to_json(doc_value);
-}
+//     bsoncxx::document::value doc_value = before_seller << bsoncxx::builder::stream::close_array
+//     << bsoncxx::builder::stream::finalize;  
+//     return bsoncxx::to_json(doc_value);
+// }
 
-bsoncxx::document::value order_book_t::deserialize(std::string data) {
-    return bsoncxx::from_json(data);
-}
+// bsoncxx::document::value order_book_t::deserialize(std::string data) {
+//     return bsoncxx::from_json(data);
+// }
 
 order_book_t::~order_book_t() {
     delete buyer_queue;
     delete seller_queue;
 }
 
-void calculator::do_calculation(VectorSerialization<order_t>& orders, VectorSerialization<trade_t>& trades) {
+void calculator::do_calculation(std::vector<order_t>& orders, std::vector<trade_t>& trades) {
     auto it_orders = orders.begin();
     auto it_trades = trades.begin();
     int counter = 0;
@@ -160,22 +164,22 @@ void calculator::do_calculation(VectorSerialization<order_t>& orders, VectorSeri
     it_orders = orders.begin();
     it_trades = trades.begin();
 
-    CRedisPublisher publisher;
-    std::string channel_name = "test-channel";
+    // CRedisPublisher publisher;
+    // std::string channel_name = "test-channel";
 
-    bool ret = publisher.init();
-    if (!ret)
-    {
-        printf("Init failed.\n");
-        return;
-    }
+    // bool ret = publisher.init();
+    // if (!ret)
+    // {
+    //     printf("Init failed.\n");
+    //     return;
+    // }
 
-    ret = publisher.connect();
-    if (!ret)
-    {
-        printf("connect failed.");
-        return;
-    }
+    // ret = publisher.connect();
+    // if (!ret)
+    // {
+    //     printf("connect failed.");
+    //     return;
+    // }
 
     order_t cur_order;
     trade_t cur_trade;
@@ -199,7 +203,7 @@ void calculator::do_calculation(VectorSerialization<order_t>& orders, VectorSeri
             tot++;
             // order_book->display_buyer("tmp.txt");
             // order_book->display_seller("tmp.txt");
-            publisher.publish(channel_name, this->order_book->serialize(cur_time));
+            // publisher.publish(channel_name, this->order_book->serialize(cur_time));
             // std::cerr << order_book->serialize(cur_time);
         }
     }
@@ -209,30 +213,30 @@ void calculator::do_calculation(VectorSerialization<order_t>& orders, VectorSeri
         cur_order = *it_orders;
         handle_order(cur_order);
         it_orders ++;
-        if (++counter > storage_interval) {
-            counter = 0;
-            tot++;
-            publisher.publish(channel_name, this->order_book->serialize(cur_time));
-        }
+        // if (++counter > storage_interval) {
+        //     counter = 0;
+        //     tot++;
+            // publisher.publish(channel_name, this->order_book->serialize(cur_time));
+        // }
     }
 
     while (it_trades != trades.end()) {
         cur_trade = *it_trades;
         handle_trade(cur_trade);
         it_trades ++;
-        if (++counter > storage_interval) {
-            counter = 0;
-            tot++;
-            publisher.publish(channel_name, this->order_book->serialize(cur_time));
-        }
+        // if (++counter > storage_interval) {
+        //     counter = 0;
+        //     tot++;
+        //     publisher.publish(channel_name, this->order_book->serialize(cur_time));
+        // }
     }
 
     // std::cerr << '\n' << this->order_book->serialize(cur_time) << '\n';
-    publisher.publish(channel_name, this->order_book->serialize(cur_time));
+    // publisher.publish(channel_name, this->order_book->serialize(cur_time));
     
-    sleep(1);
-    publisher.disconnect();
-    publisher.uninit();
+    // sleep(1);
+    // publisher.disconnect();
+    // publisher.uninit();
     
 }
 

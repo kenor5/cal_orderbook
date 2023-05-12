@@ -4,10 +4,10 @@
 #include "skipList.h"
 #include <vector>
 #include <unordered_set>
-#include <bsoncxx/builder/stream/helpers.hpp>
-#include <bsoncxx/builder/stream/document.hpp>
-#include <bsoncxx/builder/stream/array.hpp>
-#include <bsoncxx/json.hpp>
+// #include <bsoncxx/builder/stream/helpers.hpp>
+// #include <bsoncxx/builder/stream/document.hpp>
+// #include <bsoncxx/builder/stream/array.hpp>
+// #include <bsoncxx/json.hpp>
 #include "getbasic.h"
 
 // 价格-时间对，用来做orderbook存储的key
@@ -73,8 +73,8 @@ public:
     void display_buyer(std::string file);
     void display_seller(std::string file);
 
-    std::string serialize(time_stamp_t) const;
-    static bsoncxx::document::value deserialize(std::string);
+    // std::string serialize(time_stamp_t) const;
+    // static bsoncxx::document::value deserialize(std::string);
 
     order_book_t();
     ~order_book_t();
@@ -82,13 +82,12 @@ public:
 private:
     Skiplist<price_time, order_t> *buyer_queue;
     Skiplist<price_time, order_t> *seller_queue;
-    
 
 };
 
 class calculator {
 public:
-    void do_calculation(VectorSerialization<order_t>& orders, VectorSerialization<trade_t>& trades);
+    void do_calculation(std::vector<order_t>& orders, std::vector<trade_t>& trades);
     void handle_trade(trade_t trade);    // 处理成交或撤单
     void handle_order(order_t order);   // 处理委托
     ~calculator(){
