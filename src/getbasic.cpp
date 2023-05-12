@@ -5,32 +5,27 @@
 // #include <boost/serialization/string.hpp>
 // #include <boost/serialization/vector.hpp>
 
-GetBasic::GetBasic(const std::string& fileName)
+GetBasic::GetBasic(const std::string& path)
 {
-    // std::cout<<path<<std::endl;
-    // if(utils::dirExists(path))
-    // {
-    //     std::vector<std::string> fileNames;
-    //     utils::scanDir(path,fileNames);
-
-    //     for(std::string& fileName : fileNames)
-    //     {
+    std::cout<<path<<std::endl;
+    if(utils::dirExists(path))
+    {
+        std::vector<std::string> fileNames;
+        utils::scanDir(path,fileNames);
+        for(std::string& fileName : fileNames)
+        {
             std::cout<<fileName<<std::endl;
-            rapidcsv::Document doc(fileName, rapidcsv::LabelParams(-1,-1));
-            Trades = std::vector<trade_t>();
-            Orders = std::vector<order_t>();
+            rapidcsv::Document doc(path+ "/" + fileName, rapidcsv::LabelParams(-1,-1));
+            Trades.push_back( std::vector<trade_t>());
+            Orders.push_back(std::vector<order_t>());
             parse(doc);
-        // }
-    // }
+        }
+    }
 }
 
 
 void GetBasic::parse(rapidcsv::Document& doc)
 {
-
-
-
-
     std::vector<char> Datatypes = doc.GetColumn<char>(Base_Datatype_Col);
     std::vector<int> FirstFids = doc.GetColumn<int>(Base_FirstFid_Col);
     std::vector<int> SrcIds = doc.GetColumn<int>(Base_SrcId_Col);
@@ -57,54 +52,9 @@ void GetBasic::parse(rapidcsv::Document& doc)
             get_Order(row,doc);
         }
         
-        // if(trade.size() + order.size() >= 50000&&row<sz-1)
-        // {
-        //     // std::ostringstream os1, os2;
-        //     // order.serialization(os1);
-        //     // trade.serialization(os2);
-        //     // str = os1.str();
 
-        //     str = fill(str.size()) + str + os2.str();
-        //     publisher.publish(channel_name,str);
-        //     // sleep(1);
-        //     std::cerr << order.size() + trade.size() << '\n';
-
-        //     order.clear();
-        //     trade.clear();
-        //     // VectorSerialization<trade_t>(trade).swap(trade);
-        //     // VectorSerialization<trade_t>(order).swap(order);
-        //     counter++;
-
-            
-        // }
-//        else if(FirstFid == BaseFid)
-//        {
-//            get_Base(row,doc);
-//        }
     }
-    // if (order.size()+trade.size() >0) {
-    //     std::ostringstream os1, os2;
-    //     order.serialization(os1);
-    //     trade.serialization(os2);
-    //     str = os1.str();
 
-    //     str = fill(str.size()) + str + os2.str();
-    //     publisher.publish(channel_name,str);
-    //     counter++;
-    //     order.clear();
-    //     trade.clear();
-        // VectorSerialization<trade_t>(trade).swap(trade);
-        // VectorSerialization<trade_t>(order).swap(order);
-    // }
-
-    // publisher.publish(channel_name, "finish");
-
-    // std::cerr << "counter:" <<  counter << '\n';
-    // if (counter >= 15) sleep(200);
-    // else if (counter == 0) sleep(3);
-    // else  sleep(3*counter);
-    // publisher.disconnect();
-    // publisher.uninit();
 }
 
 
@@ -119,7 +69,7 @@ void GetBasic::get_Trade(int row,rapidcsv::Document& doc)
     int seq =  doc.GetCell<int>(Trade_SeqNum_Col,row);
     int bid_seq =  doc.GetCell<int>(Trade_BidSeqNum_Col,row);
     int ask_seq =  doc.GetCell<int>(Trade_AskSeqNum_Col,row);
-    Trades.emplace_back(ns,InstrumentId,flag,price,vol,seq,bid_seq,ask_seq);
+    Trades.back().emplace_back(ns,InstrumentId,flag,price,vol,seq,bid_seq,ask_seq);
     // trade.emplace_back(ns,InstrumentId,flag,price,vol,seq,bid_seq,ask_seq);
 }
 
@@ -139,7 +89,7 @@ void GetBasic::get_Order(int row,rapidcsv::Document& doc)
          else type = best_price_flag;
      }
      int seq = doc.GetCell<int>(Order_SeqNum_Col,row);
-     Orders.emplace_back(ns,InstrumentId,side,price,vol,type,seq);
+     Orders.back().emplace_back(ns,InstrumentId,side,price,vol,type,seq);
     //  order.emplace_back(ns,InstrumentId,side,price,vol,type,seq);
 }
 

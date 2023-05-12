@@ -18,19 +18,19 @@ int main(int argc, char* argv[])
     clock_t start, end;
     
     start = clock();
-    // GetBasic getbasic("../../../Data/data/20221012");
     GetBasic getbasic(name);
     end = clock();
     std::cout << "load: " << (double)(end-start)/CLOCKS_PER_SEC << "s" << std::endl;
 
     auto orders = getbasic.get_Orders();
     auto trades = getbasic.get_Trades();
-
+    for (int i = 0; i < orders.size(); ++i){
         start = clock();
         calculator cal;
-        cal.do_calculation(orders, trades);
+        cal.do_calculation(orders[i], trades[i]);
         end = clock();
-    std::cout << "cal: " << (double)(end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+        std::cout << "cal: " << (double)(end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+    }
     
     return 0;
 }

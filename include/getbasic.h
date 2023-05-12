@@ -97,41 +97,14 @@
 #define Order_SeqNum_Col 20
 #define Order_BizIndex_Col 21
 
-// template<class T>
-// class Serialization : public T {
-// public:
- 
-//     void serialization(std::ostringstream& ostream) {
-//         boost::archive::text_oarchive oa(ostream);
-//         oa << *this;
-//     }
- 
-//     void unserialization(std::istringstream& istream) {
-//         boost::archive::text_iarchive ia(istream);
-//         ia >> *this;
-//     }
-// private:  
-//     friend class boost::serialization::access;  
- 
-//     template<class Archive>  
-//     void serialize(Archive& ar, const unsigned int version) {  
-//         ar & boost::serialization::base_object<T>(*this);  
-//     }
-// };
-
-
-// template<class T>
-// class VectorSerialization : public Serialization<std::vector<T> > {
-// };
-
 
 class GetBasic
 {
 private:
 
     //根据InstrumentID储存入二维数组中
-    std::vector<trade_t> Trades;
-    std::vector<order_t> Orders;
+    std::vector<std::vector<trade_t>> Trades;
+    std::vector<std::vector<order_t>> Orders;
 //    std::vector<std::vector<base_t>> Bases;
 
 
@@ -152,8 +125,8 @@ private:
 
 public:
     GetBasic(const std::string&);  
-    std::vector<trade_t> get_Trades(){return Trades;};
-    std::vector<order_t> get_Orders(){return Orders;};
+    std::vector<std::vector<trade_t>> get_Trades(){return Trades;};
+    std::vector<std::vector<order_t>> get_Orders(){return Orders;};
 };
 
 

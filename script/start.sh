@@ -2,12 +2,15 @@
 DATA_DIR="/root/Data/data/"
 
 ProJ="csob-docker"
+ProJN="csob-docker"
 ImageName="mhdj/csob:v2.0"
-YamlName="./yaml/csob.yaml"
+YamlName="./yaml/csob_job.yaml"
 
 DataFolders=`ls ${DATA_DIR}`
 Dir="/nfs/data/"
 
+
+# 获取所有data目录下的数据目录
 i=1
 set=()
 for j in ${DataFolders}
@@ -33,26 +36,22 @@ done
 
 w = 1
 
-ProJN="csob-docker"
+
 
 export ImageName=${ImageName}
 
 for i in ${tot[*]}
 do
-    if [[ $w -ne 100 ]];
+    if [[ $w -ne 3 ]];
     then
-        # echo ${i}
-
         ((w+=1))
 
-        # echo $w
         export ProJ="${ProJN}${w}"
         echo ${ProJ}
         export FileName=${i}
         envsubst < ${YamlName} | kubectl create -f -
     else
         break 
-    
     fi
 done
 
